@@ -9,16 +9,122 @@ use App\Models\FloorPlanAmenity;
 use App\Models\FloorPlan;
 use App\Models\FloorPlanType;
 use App\Models\ProjectAmenity;
-use App\Models\FloorPlanFeature;
 use App\Models\UnitFeature;
+use App\Models\FloorPlanFeature;
+use App\Models\PropertyType;
+use App\Models\Bedroom;
+use App\Models\Bathroom;
+use App\Models\Size;
 use App\Models\Unit;
+use App\Models\Developer;
+use App\Models\Status;
+use App\Models\UnitStatus;
+use App\Models\Mode;
+use App\Models\City;
+use App\Models\BusinessFeature;
+use App\Models\CommunityFeature;
+use App\Models\MainFeature;
+use App\Models\HealthCareFeature;
 use Carbon\Carbon;
 use Validator;
 use DB;
+use Auth;
 use Rule;
 
 class DeveloperRepository
 {
+    public function login($request){
+        $attr = Validator::make($request->all(), [
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+        if ($attr->fails()) {
+            return [
+                'status' => 300,
+                'msg' => $attr->messages()->first(),
+                'data' => null
+            ];
+        } else {
+            $attr = $request->all();
+        }
+        $credentials = [
+            'email' => $request['email'],
+            'password' => $request['password']
+        ];
+        if (Auth::attempt($credentials)) {
+            $user = Developer::where('email', $request['email'])->firstOrFail();
+            $token = $user->createToken('API Token')->plainTextToken;
+            return [
+                'status' => 200,
+                'msg' => 'Login Successful',
+                'data' => [
+                    'token' => $token
+                ]
+            ];
+        }
+        else {
+            return [
+                'status' => 201,
+                'msg' => 'Login unsuccessful',
+                'data' => [
+                    'token' => null
+                ]
+            ];
+        }
+    }
+
+    public function register($request){
+        $attr = Validator::make($request->all(), [
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'phone' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'company_name' => 'required',
+            'company_address' => 'required',
+            'company_phone' => 'required',
+            'company_website' => 'required',
+            'trade_license' => 'required',
+            'trade_license_exp' => 'required',
+            'trade_license_document' => 'required',
+        ]);
+        if ($attr->fails()) {
+            return [
+                'status' => 300,
+                'msg' => $attr->messages()->first(),
+                'data' => null
+            ];
+        } else {
+            $attr = $request->all();
+        }
+        $input = [
+            'first_name' => $attr['firstname'],
+            'last_name' => $attr['lastname'],
+            'number' => $attr['phone'],
+            'email' => $attr['email'],
+            'password' => $attr['password'],
+            'company_name' => $attr['company_name'],
+            'company_address' => $attr['company_address'],
+            'company_phone' => $attr['company_phone'],
+            'company_website' => $attr['company_website'],
+            'trade_license' => $attr['trade_license'],
+            'trade_license_expiry' => $attr['trade_license_exp'],
+            'trade_license_document' => '',
+        ];
+        $upload_folder = 'developers';
+        $trade_license_path = $attr['trade_license_document']->store($upload_folder, 'public');
+        $input['trade_license_document'] = $trade_license_path;
+        $user = Developer::create($input);
+        $token = $user->createToken('API Token', ['is-dasher'])->plainTextToken;
+        return [
+            'status' => 200,
+            'msg' => 'Registration successfuly',
+            'data' => [
+                'token' => $token
+            ]
+        ];
+    }
+    
     public function createProject($request){
         // Auth::guard('web');
         $attr = Validator::make($request->all(), [
@@ -60,7 +166,6 @@ class DeveloperRepository
 
         $attr['developers_id'] = 1;
         $upload_folder = 'projects';
-        // dd($attr['mode']);
         if($attr['mode'] == "true"){
             $modes_id = $attr['modes_id'];
         } else {
@@ -365,5 +470,103 @@ class DeveloperRepository
             'msg' => "Feature added to Floor Plan Successfuly",
             'data' => null
         ];
+    }
+
+    public function projectFormGet(){
+        $statuses = Status::select('id', 'name')->get();
+        $modes = Mode::select('id', 'name')->get();
+        $cities = City::select('id', 'name')->get();
+        $main_feat =  MainFeature::select('id', 'name')->get();
+        $business_feat =  BusinessFeature::select('id', 'name')->get();
+        $community_feat =  CommunityFeature::select('id', 'name')->get();
+        $health_feat =  HealthCareFeature::select('id', 'name')->get();
+        $return = [
+            'status' => 200,
+            'msg' => 'Dropdowns data',
+            'data' => [ 
+                'statuses' => $statuses,
+                'modes' => $modes,
+                'cities' => $cities,
+                'main_feat' => $main_feat,
+                'business_feat' => $business_feat,
+                'community_feat' => $community_feat,
+                'health_feat' => $health_feat,
+            ]
+        ];
+        return $return;
+    }
+
+    public function floorPlanCreateGet(){
+        $property_types = PropertyType::select('id', 'name')->get();
+        $return = [
+            'status' => 200,
+            'msg' => 'Dropdowns data',
+            'data' => [ 
+                'property_types' => $property_types,
+            ]
+        ];
+        return $return;
+    }
+    
+    public function floorPlanEditGet(){
+        $floorPlanFeatures = FloorPlanFeature::select('id', 'name')->get();
+        $bathrooms = Bathroom::select('id', 'name')->get();
+        $bedrooms = Bedroom::select('id', 'name')->get();
+        $sizes = Size::select('id', 'name')->get();
+        $return = [
+            'status' => 200,
+            'msg' => 'Dropdowns data',
+            'data' => [ 
+                'floorPlanFeatures' => $floorPlanFeatures,
+                'bathrooms' => $bathrooms,
+                'bedrooms' => $bedrooms,
+                'sizes' => $sizes,
+            ]
+        ];
+        return $return;
+    }
+    
+    public function unitCreateGet(){
+        $unit_statuses = UnitStatus::select('id', 'name')->get();
+        $unit_features = UnitFeature::select('id', 'name')->get();
+        $return = [
+            'status' => 200,
+            'msg' => 'Dropdowns data',
+            'data' => [ 
+                'unit_statuses' => $unit_statuses,
+                'unit_features' => $unit_features,
+            ]
+        ];
+        return $return;   
+    }
+
+    public function projectListing(){
+        $projects = Project::select('id', 'name', 'statuses_id')->where('developers_id', 1)->get();
+        $return_data = [];
+        foreach($projects as $project){
+            $unit_count = 0;
+            $fps = FloorPlan::where('projects_id', $project['id'])->get();
+            if(sizeof($fps)>0){
+                $count = 0;
+                foreach($fps as $fp){
+                    $unit = Unit::where('floor_plans_id', $fp['id'])->get();
+                    $count = $count + count($unit);
+                }
+            }
+            $unit_count = $unit_count + $count; 
+            $projectObj = [
+                'id' => $project['id'],
+                'name' => $project['name'],
+                'count' => $unit_count,
+                'status' => $project->status
+            ];
+            array_push($return_data, $projectObj);
+        }
+        $return = [
+            'status' => 200,
+            'msg' => 'Listed Project',
+            'data' => $return_data
+        ];
+        return $return;   
     }
 }

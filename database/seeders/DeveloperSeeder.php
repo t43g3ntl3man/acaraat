@@ -32,9 +32,9 @@ class DeveloperSeeder extends Seeder
                 'company_phone' => $faker->phoneNumber,
                 'company_address' => $faker->address,
                 'company_website' => 'www.'.strtolower($name_fake).'.com',
-                'rera_id' => strtolower($name_fake).str(rand(111, 999)),
-                'rera_expiry' => Carbon::now()->addYears(rand(1, 5))->format('Y-m-d H:i:s'),
-                'rera_document' => 'null',
+                'trade_license' => strtolower($name_fake).str(rand(111, 999)),
+                'trade_license_expiry' => Carbon::now()->addYears(rand(1, 5))->format('Y-m-d H:i:s'),
+                'trade_license_document' => 'null',
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s')
             ]);
         }

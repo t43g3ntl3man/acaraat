@@ -24,9 +24,9 @@ return new class extends Migration
             $table->string('company_address');
             $table->string('company_phone');
             $table->string('company_website');
-            $table->string('rera_id');
-            $table->string('rera_expiry');
-            $table->string('rera_document');
+            $table->string('trade_license');
+            $table->string('trade_license_expiry');
+            $table->string('trade_license_document');
             $table->timestamps();
         });
     }

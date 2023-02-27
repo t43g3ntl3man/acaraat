@@ -20,4 +20,9 @@ class Project extends Model
 
     protected $fillable = ['name', 'developers_id', 'statuses_id', 'modes_id', 'completion_date', 'permit_number', 'deed', 'escrow', 'cities_id', 'location', 'brief_desctiption', 'no_of_units', 'no_of_floors', 'images', 'videos', 'cover', 'brouchers', 'minimum_price', 'maximum_price', 'payment_plans', 'main_features',
     'business_com', 'community_feat', 'healthcare'];
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class, 'statuses_id');
+    }
 }

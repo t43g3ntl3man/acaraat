@@ -31,4 +31,23 @@ class FloorPlanController extends Controller
             "data" => null
         ]);
     }
+
+    public function floorPlanCreateGet(){
+        $response = $this->developerRepository->floorPlanCreateGet();
+        return response()->json([
+            'status' => $response['status'],
+            "msg" => $response['msg'],
+            "data" => $response['data']
+        ]);
+    }
+    
+    public function floorPlanEditGet(){
+        $response = $this->developerRepository->floorPlanEditGet();
+        return response()->json([
+            'status' => $response['status'],
+            "msg" => $response['msg'],
+            "data" => $response['data']
+        ]);
+    }
+    
 }

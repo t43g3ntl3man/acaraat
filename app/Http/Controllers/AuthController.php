@@ -7,24 +7,24 @@ use App\Repositories\DeveloperRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
-class UnitController extends Controller
+class AuthController extends Controller
 {
+    private DeveloperRepository $developerRepository;
     public function __construct(DeveloperRepository $developerRepository) 
     {
         $this->developerRepository = $developerRepository;
     }
-
-    public function createUnit(Request $request){
-        $response = $this->developerRepository->createUnit($request);
+    public function login(Request $request){
+        $response = $this->developerRepository->login($request);
         return response()->json([
             'status' => $response['status'],
             "msg" => $response['msg'],
-            "data" => null
+            "data" => $response['data']
         ]);
     }
 
-    public function unitCreateGet(){
-        $response = $this->developerRepository->unitCreateGet();
+    public function register(Request $request){
+        $response = $this->developerRepository->register($request);
         return response()->json([
             'status' => $response['status'],
             "msg" => $response['msg'],
