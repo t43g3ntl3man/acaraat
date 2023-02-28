@@ -164,7 +164,7 @@ class DeveloperRepository
             $attr = $request->all();
         }
 
-        $attr['developers_id'] = 1;
+        $attr['developers_id'] = Auth::user()->id;
         $upload_folder = 'projects';
         if($attr['mode'] == "true"){
             $modes_id = $attr['modes_id'];
@@ -437,7 +437,7 @@ class DeveloperRepository
         }
         $input = [
             'name' => $attr['name'],
-            'developers_id' => rand(1, 4)
+            'developers_id' => Auth::user()->id
         ];
         $feature = UnitFeature::create($input);
         return [
@@ -541,7 +541,7 @@ class DeveloperRepository
     }
 
     public function projectListing(){
-        $projects = Project::select('id', 'name', 'statuses_id')->where('developers_id', 1)->get();
+        $projects = Project::select('id', 'name', 'statuses_id')->where('developers_id', Auth::user()->id)->get();
         $return_data = [];
         foreach($projects as $project){
             $unit_count = 0;
@@ -568,5 +568,15 @@ class DeveloperRepository
             'data' => $return_data
         ];
         return $return;   
+    }
+
+    public function userInfo(){
+        return [
+            'status' => '200',
+            'msg' => 'User Info fetched successfuly',
+            'data' => [
+                'user_id' => Auth::user()->id
+            ]
+        ];
     }
 }
